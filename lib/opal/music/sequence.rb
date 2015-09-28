@@ -74,7 +74,6 @@
     this.smoothing = 0;
     this.staccato = 0;
     this.notes = [];
-    this.push.apply( this, arr || [] );
   }
 
   // create gain and EQ nodes, then connect 'em
@@ -88,14 +87,6 @@
       prev.connect( prev = filter );
     }.bind( this ));
     prev.connect( this.ac.destination );
-    return this;
-  };
-
-  // accepts Note instances or strings (e.g. 'A4 e')
-  Sequence.prototype.push = function() {
-    Array.prototype.forEach.call( arguments, function( note ) {
-      this.notes.push( note instanceof Note ? note : new Note( note ) );
-    }.bind( this ));
     return this;
   };
 
@@ -211,15 +202,21 @@
 module Music
   class Sequence
     include Native
-    alias_native :push
     alias_native :play
 
-    def initialize(ac, tempo)
+    def initialize(ac, tempo, notes = [])
       @native = `new Sequence(#{ac.to_n}, tempo)`
+      @notes  = notes
     end
 
     def loop=(value)
       `#@native.loop = value`
+    end
+
+    def push(*extra_notes)
+      @notes.concat(extra_notes)
+      # send notes back to native object for now
+      `#@native.notes = #{@notes.to_n}`
     end
   end
 
