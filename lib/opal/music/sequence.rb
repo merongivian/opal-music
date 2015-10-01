@@ -68,27 +68,12 @@
   // create a new Sequence
   function Sequence( ac, tempo, arr ) {
     this.ac = ac;
-    this.createFxNodes();
     this.tempo = tempo || 120;
     this.loop = true;
     this.smoothing = 0;
     this.staccato = 0;
     this.notes = [];
   }
-
-  // create gain and EQ nodes, then connect 'em
-  Sequence.prototype.createFxNodes = function() {
-    var eq = [ [ 'bass', 100 ], [ 'mid', 1000 ], [ 'treble', 2500 ] ],
-      prev = this.gain = this.ac.createGain();
-    eq.forEach(function( config, filter ) {
-      filter = this[ config[ 0 ] ] = this.ac.createBiquadFilter();
-      filter.type = 'peaking';
-      filter.frequency.value = config[ 1 ];
-      prev.connect( prev = filter );
-    }.bind( this ));
-    prev.connect( this.ac.destination );
-    return this;
-  };
 
   // create a custom waveform as opposed to "sawtooth", "triangle", etc
   Sequence.prototype.createCustomWave = function( real, imag ) {
@@ -102,25 +87,6 @@
 
     // Reset customWave
     this.customWave = [ new Float32Array( real ), new Float32Array( imag ) ];
-  };
-
-  // recreate the oscillator node (happens on every play)
-  Sequence.prototype.createOscillator = function() {
-    this.stop();
-    this.osc = this.ac.createOscillator();
-
-    // customWave should be an array of Float32Arrays. The more elements in
-    // each Float32Array, the dirtier (saw-like) the wave is
-    if ( this.customWave ) {
-      this.osc.setPeriodicWave(
-        this.ac.createPeriodicWave.apply( this.ac, this.customWave )
-      );
-    } else {
-      this.osc.type = this.waveType || 'square';
-    }
-
-    this.osc.connect( this.gain );
-    return this;
   };
 
   // schedules this.notes[ index ] to play at the given time
@@ -171,23 +137,6 @@
     return this;
   };
 
-  // run through all notes in the sequence and schedule them
-  Sequence.prototype.play = function( when ) {
-    when = typeof when === 'number' ? when : this.ac.currentTime;
-
-    this.createOscillator();
-    this.osc.start( when );
-
-    this.notes.forEach(function( note, i ) {
-      when = this.scheduleNote( i, when );
-    }.bind( this ));
-
-    this.osc.stop( when );
-    this.osc.onended = this.loop ? this.play.bind( this, when ) : null;
-
-    return this;
-  };
-
   // stop playback, null out the oscillator, cancel parameter automation
   Sequence.prototype.stop = function() {
     if ( this.osc ) {
@@ -202,11 +151,12 @@
 module Music
   class Sequence
     include Native
-    alias_native :play
 
-    def initialize(ac, tempo, notes = [])
-      @native = `new Sequence(#{ac.to_n}, tempo)`
-      @notes  = notes
+    def initialize(audio_context, tempo, notes = [])
+      @native        = `new Sequence(#{audio_context.to_n}, tempo)`
+      @audio_context = audio_context
+      @notes         = notes
+      create_fx_nodes
     end
 
     def loop=(value)
@@ -217,6 +167,46 @@ module Music
       @notes.concat(extra_notes)
       # send notes back to native object for now
       `#@native.notes = #{@notes.to_n}`
+    end
+
+    def play(when_time = nil)
+      when_time ||= @audio_context.current_time
+      create_oscillator
+
+      @osc.start(when_time)
+
+      @notes.each_with_index do |note, index|
+        when_time = `#{@native}.scheduleNote(index, when_time)`
+      end
+
+      @osc.stop(when_time)
+    end
+
+    private
+
+    # TODO add code for custom oscillator wave
+    def create_oscillator
+      # what is this for?
+      `#{@native}.stop();`
+      @osc = @audio_context.oscillator
+      @osc.type = :square
+      @osc.connect(@gain)
+      # TODO erase this when osc var has been
+      # fully replaced
+      `#{@native}.osc = #{@osc.to_n}`
+    end
+
+    def create_fx_nodes
+      eq = { bass: 100, mid: 1000, treble: 2500 }
+      prev = @gain = @audio_context.gain
+      # why is it connecting all eq nodes sequentially ?
+      eq.each do |eq_type, value|
+        filter = instance_variable_set("@#{eq_type}", @audio_context.biquad_filter)
+        filter.type = :peaking
+        filter.frequency = value
+        prev.connect(prev = filter)
+      end
+      prev.connect(@audio_context.destination);
     end
   end
 

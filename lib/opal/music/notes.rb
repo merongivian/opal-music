@@ -7,14 +7,14 @@ module Music
       ac = Browser::Audio::Context.new
       tempo = 120
 
-      note1 = Music::Note.new('G3 q')
-      note2 = Music::Note.new('E4 q')
-      note3 = Music::Note.new('C4 h')
+      note1 = Note.new('G3 q')
+      note2 = Note.new('E4 q')
+      note3 = Note.new('C4 h')
 
-      sequence = Music::Sequence.new(ac, tempo);
+      sequence = Sequence.new(ac, tempo);
       sequence.push(note1, note2, note3);
 
-      sequence.loop = false;
+      sequence.loop = true;
 
       sequence.play
 
