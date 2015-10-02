@@ -5,31 +5,77 @@ module Music
   class Keyboard
     def play
       ac = Browser::Audio::Context.new
-      tempo = 120
+      tempo = 132
 
-      note1 = Note.new('G3 q')
-      note2 = Note.new('E4 q')
-      note3 = Note.new('C4 h')
+      lead = [
+        '-   e',
+        'Bb3 e',
+        'A3  e',
+        'Bb3 e',
+        'G3  e',
+        'A3  e',
+        'F3  e',
+        'G3  e',
 
-      sequence = Sequence.new(ac, tempo);
-      sequence.push(note1, note2, note3);
+        'E3  e',
+        'F3  e',
+        'G3  e',
+        'F3  e',
+        'E3  e',
+        'F3  e',
+        'D3  q',
 
-      sequence.loop = true;
+        '-   e',
+        'Bb3 s',
+        'A3  s',
+        'Bb3 e',
+        'G3  e',
+        'A3  e',
+        'G3  e',
+        'F3  e',
+        'G3  e',
 
-      sequence.play
+        'E3  e',
+        'F3  e',
+        'G3  e',
+        'F3  e',
+        'E3  s',
+        'F3  s',
+        'E3  e',
+        'D3  q'
+      ]
 
-      #ac = Browser::Audio::Context.new
-      #lfo = ac.oscillator
-      #vca = ac.gain
-      #oscillator = ac.oscillator
+      bass = [
+        'D3  q',
+        '-   h',
+        'D3  q',
 
-      #lfo.connect(vca.gain false)
-      #oscillator.connect vca
-      #vca.connect ac.destination
+        'A2  q',
+        '-   h',
+        'A2  q',
 
-      #lfo.start
-      #lfo.frequency = 4
-      #oscillator.start(4)
+        'Bb2 q',
+        '-   h',
+        'Bb2 q',
+
+        'F2  h',
+        'A2  h'
+      ]
+
+      sequence_lead = Sequence.new(ac, tempo, lead);
+      sequence_bass = Sequence.new(ac, tempo, bass);
+
+      # set staccato and smoothing values for maximum coolness
+      sequence_lead.staccato  = 0.55;
+      sequence_bass.staccato  = 0.05;
+      sequence_bass.smoothing = 0.4;
+
+      # lower base
+      sequence_lead.gain.gain = 1.0 / 2;
+      sequence_bass.gain.gain = 0.65 / 2;
+
+      sequence_lead.play
+      sequence_bass.play
     end
   end
 end

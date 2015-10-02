@@ -89,54 +89,6 @@
     this.customWave = [ new Float32Array( real ), new Float32Array( imag ) ];
   };
 
-  // schedules this.notes[ index ] to play at the given time
-  // returns an AudioContext timestamp of when the note will *end*
-  Sequence.prototype.scheduleNote = function( index, when ) {
-    var duration = 60 / this.tempo * this.notes[ index ].duration,
-      cutoff = duration * ( 1 - ( this.staccato || 0 ) );
-
-    this.setFrequency( this.notes[ index ].frequency, when );
-
-    if ( this.smoothing && this.notes[ index ].frequency ) {
-      this.slide( index, when, cutoff );
-    }
-
-    this.setFrequency( 0, when + cutoff );
-    return when + duration;
-  };
-
-  // get the next note
-  Sequence.prototype.getNextNote = function( index ) {
-    return this.notes[ index < this.notes.length - 1 ? index + 1 : 0 ];
-  };
-
-  // how long do we wait before beginning the slide? (in seconds)
-  Sequence.prototype.getSlideStartDelay = function( duration ) {
-    return duration - Math.min( duration, 60 / this.tempo * this.smoothing );
-  };
-
-  // slide the note at <index> into the next note at the given time,
-  // and apply staccato effect if needed
-  Sequence.prototype.slide = function( index, when, cutoff ) {
-    var next = this.getNextNote( index ),
-      start = this.getSlideStartDelay( cutoff );
-    this.setFrequency( this.notes[ index ].frequency, when + start );
-    this.rampFrequency( next.frequency, when + cutoff );
-    return this;
-  };
-
-  // set frequency at time
-  Sequence.prototype.setFrequency = function( freq, when ) {
-    this.osc.frequency.setValueAtTime( freq, when );
-    return this;
-  };
-
-  // ramp to frequency at time
-  Sequence.prototype.rampFrequency = function( freq, when ) {
-    this.osc.frequency.linearRampToValueAtTime( freq, when );
-    return this;
-  };
-
   // stop playback, null out the oscillator, cancel parameter automation
   Sequence.prototype.stop = function() {
     if ( this.osc ) {
@@ -152,15 +104,17 @@ module Music
   class Sequence
     include Native
 
+    attr_accessor :loop, :gain, :staccato, :smoothing
+
     def initialize(audio_context, tempo, notes = [])
-      @native        = `new Sequence(#{audio_context.to_n}, tempo)`
+      @native        = `new Sequence(#{audio_context.to_n}, tempo, notes)`
       @audio_context = audio_context
       @notes         = notes
+      @tempo         = tempo
+      @loop          = true
+      @staccato      = 0
+      @smoothing     = 0
       create_fx_nodes
-    end
-
-    def loop=(value)
-      `#@native.loop = value`
     end
 
     def push(*extra_notes)
@@ -176,7 +130,7 @@ module Music
       @osc.start(when_time)
 
       @notes.each_with_index do |note, index|
-        when_time = `#{@native}.scheduleNote(index, when_time)`
+        when_time = schedule_note(index, when_time)
       end
 
       @osc.stop(when_time)
@@ -208,10 +162,60 @@ module Music
       end
       prev.connect(@audio_context.destination);
     end
+
+    def schedule_note(index, when_time)
+      current_note = get_current_note(index)
+      duration = 60 / @tempo * current_note.duration
+      cutoff = duration * ( 1 - ( @staccato || 0 ) );
+      set_frequency(current_note.frequency, when_time);
+
+      if (@smoothing != 0 && current_note.frequency != 0)
+        slide(index, when_time, cutoff)
+      end
+
+      set_frequency(0, when_time + cutoff)
+      when_time + duration
+    end
+
+    def slide(index, when_time, cutoff)
+      current_note = get_current_note(index)
+      next_note = get_next_note(index)
+
+      start = get_slide_start_delay(cutoff)
+
+      set_frequency(current_note.frequency, when_time + start)
+      ramp_frequency(next_note.frequency, when_time + cutoff)
+    end
+
+    def get_next_note(index)
+      next_note = @notes[index < (@notes.length) -1 ? index + 1 : 0]
+      next_note.is_a?(Note) ? next_note : Note.new(next_note)
+    end
+
+    def get_current_note(index)
+      current_note = @notes[index].is_a?(Note) ? @notes[index] : Note.new(@notes[index])
+    end
+
+    def get_slide_start_delay(duration)
+      duration - [ duration, (60 / @tempo * @smoothing) ].min
+    end
+
+    def set_frequency(freq, when_time)
+      scheduler = Browser::Audio::ParamSchedule.new(@osc.frequency false)
+      scheduler.value(freq, when_time)
+    end
+
+    def ramp_frequency(freq, when_time)
+      scheduler = Browser::Audio::ParamSchedule.new(@osc.frequency false)
+      scheduler.linear_ramp_to(freq, when_time)
+    end
   end
 
   class Note
     include Native
+
+    alias_native :duration
+    alias_native :frequency
 
     def initialize(music_note)
       @native = `new Note(music_note)`
