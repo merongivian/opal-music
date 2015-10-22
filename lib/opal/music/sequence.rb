@@ -85,13 +85,13 @@ module Music
       when_time ||= @audio_context.current_time
       create_oscillator
 
-      @osc.start(when_time)
+      @oscillator.start(when_time)
 
       @notes.each_with_index do |note, index|
         when_time = schedule_note(index, when_time)
       end
 
-      @osc.stop(when_time)
+      @oscillator.stop(when_time)
     end
 
     def custom_wave(real, imaginary = nil)
@@ -100,21 +100,25 @@ module Music
       @custom_wave = [real, imaginary]
     end
 
+    def wave_type=(oscillator_type)
+      @wave_type = @oscillator.type = oscillator_type
+    end
+
     private
 
     def create_oscillator
       # TODO use customized stop function
       #`#{@native}.stop();`
-      @osc = @audio_context.oscillator
+      @oscillator = @audio_context.oscillator
 
       if @custom_wave
         periodic_wave = @audio_context.periodic_wave(*@custom_wave)
-        @osc.periodic_wave = periodic_wave
+        @oscillator.periodic_wave = periodic_wave
       else
-        @osc.type = @wave_type || :square
+        @oscillator.type = @wave_type || :square
       end
 
-      @osc.connect(@gain)
+      @oscillator.connect(@gain)
     end
 
     def create_fx_nodes
@@ -168,12 +172,12 @@ module Music
     end
 
     def set_frequency(freq, when_time)
-      scheduler = Browser::Audio::ParamSchedule.new(@osc.frequency false)
+      scheduler = Browser::Audio::ParamSchedule.new(@oscillator.frequency false)
       scheduler.value(freq, when_time)
     end
 
     def ramp_frequency(freq, when_time)
-      scheduler = Browser::Audio::ParamSchedule.new(@osc.frequency false)
+      scheduler = Browser::Audio::ParamSchedule.new(@oscillator.frequency false)
       scheduler.linear_ramp_to(freq, when_time)
     end
   end
