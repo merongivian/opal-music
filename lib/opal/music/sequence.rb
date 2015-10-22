@@ -59,45 +59,6 @@
           curr === 's' ? 0.25 : 0 );
       }, 0 );
   };
-
-  // ================================SEQUENCE===============================
-  /*
-   * Sequence class
-   */
-
-  // create a new Sequence
-  function Sequence( ac, tempo, arr ) {
-    this.ac = ac;
-    this.tempo = tempo || 120;
-    this.loop = true;
-    this.smoothing = 0;
-    this.staccato = 0;
-    this.notes = [];
-  }
-
-  // create a custom waveform as opposed to "sawtooth", "triangle", etc
-  Sequence.prototype.createCustomWave = function( real, imag ) {
-    // Allow user to specify only one array and dupe it for imag.
-    if ( !imag ) {
-      imag = real;
-    }
-
-    // Wave type must be custom to apply period wave.
-    this.waveType = 'custom';
-
-    // Reset customWave
-    this.customWave = [ new Float32Array( real ), new Float32Array( imag ) ];
-  };
-
-  // stop playback, null out the oscillator, cancel parameter automation
-  Sequence.prototype.stop = function() {
-    if ( this.osc ) {
-      this.osc.onended = null;
-      this.osc.disconnect();
-      this.osc = null;
-    }
-    return this;
-  };
 }
 
 module Music
@@ -107,7 +68,6 @@ module Music
     attr_accessor :loop, :gain, :staccato, :smoothing
 
     def initialize(audio_context, tempo, notes = [])
-      @native        = `new Sequence(#{audio_context.to_n}, tempo, notes)`
       @audio_context = audio_context
       @notes         = notes
       @tempo         = tempo
@@ -119,8 +79,6 @@ module Music
 
     def push(*extra_notes)
       @notes.concat(extra_notes)
-      # send notes back to native object for now
-      `#@native.notes = #{@notes.to_n}`
     end
 
     def play(when_time = nil)
@@ -136,18 +94,27 @@ module Music
       @osc.stop(when_time)
     end
 
+    def custom_wave(real, imaginary = nil)
+      imaginary ||= real
+      @wave_type = :custom
+      @custom_wave = [real, imaginary]
+    end
+
     private
 
-    # TODO add code for custom oscillator wave
     def create_oscillator
-      # what is this for?
-      `#{@native}.stop();`
+      # TODO use customized stop function
+      #`#{@native}.stop();`
       @osc = @audio_context.oscillator
-      @osc.type = :square
+
+      if @custom_wave
+        periodic_wave = @audio_context.periodic_wave(*@custom_wave)
+        @osc.periodic_wave = periodic_wave
+      else
+        @osc.type = @wave_type || :square
+      end
+
       @osc.connect(@gain)
-      # TODO erase this when osc var has been
-      # fully replaced
-      `#{@native}.osc = #{@osc.to_n}`
     end
 
     def create_fx_nodes
