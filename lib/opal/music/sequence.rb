@@ -65,7 +65,7 @@ module Music
   class Sequence
     include Native
 
-    attr_accessor :loop, :gain, :staccato, :smoothing
+    attr_accessor :loop, :gain, :staccato, :smoothing, :tempo
 
     def initialize(audio_context, tempo, notes = [])
       @audio_context = audio_context
@@ -75,6 +75,7 @@ module Music
       @staccato      = 0
       @smoothing     = 0
       create_fx_nodes
+      create_oscillator
     end
 
     def push(*extra_notes)
@@ -83,7 +84,6 @@ module Music
 
     def play(when_time = nil)
       when_time ||= @audio_context.current_time
-      create_oscillator
 
       @oscillator.start(when_time)
 
