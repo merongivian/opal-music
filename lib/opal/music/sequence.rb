@@ -104,6 +104,12 @@ module Music
       @wave_type = @oscillator.type = oscillator_type
     end
 
+    def stop
+      return unless @oscillator
+      @oscillator.disconnect
+      @oscillator = nil
+    end
+
     private
 
     def create_oscillator
