@@ -113,8 +113,7 @@ module Music
     private
 
     def create_oscillator
-      # TODO use customized stop function
-      #`#{@native}.stop();`
+      stop
       @oscillator = @audio_context.oscillator
       # default type
       @oscillator.type = :square
