@@ -94,10 +94,10 @@ module Music
       @oscillator.stop(when_time)
     end
 
-    def custom_wave(real, imaginary = nil)
-      imaginary ||= real
+    def custom_wave_type(real, imaginary = nil)
       @wave_type = :custom
-      @custom_wave = [real, imaginary]
+      @periodic_wave = @audio_context.periodic_wave(real, imaginary || real)
+      @oscillator.periodic_wave = @periodic_wave
     end
 
     def wave_type=(oscillator_type)
@@ -116,14 +116,8 @@ module Music
       # TODO use customized stop function
       #`#{@native}.stop();`
       @oscillator = @audio_context.oscillator
-
-      if @custom_wave
-        periodic_wave = @audio_context.periodic_wave(*@custom_wave)
-        @oscillator.periodic_wave = periodic_wave
-      else
-        @oscillator.type = @wave_type || :square
-      end
-
+      # default type
+      @oscillator.type = :square
       @oscillator.connect(@gain)
     end
 
