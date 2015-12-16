@@ -1,16 +1,12 @@
-require 'opal/music/note'
-
 module Music
   class Sequence
-    include Native
 
-    attr_accessor :loop, :gain, :staccato, :smoothing, :tempo
+    attr_accessor :gain, :staccato, :smoothing, :tempo
 
     def initialize(audio_context, tempo, notes = [])
       @audio_context = audio_context
       @notes         = notes
       @tempo         = tempo
-      @loop          = true
       @staccato      = 0
       @smoothing     = 0
       create_fx_nodes
@@ -21,16 +17,21 @@ module Music
       @notes.concat(extra_notes)
     end
 
-    def play(when_time = nil)
+    def play(finite = true)
       when_time ||= @audio_context.current_time
 
       @oscillator.start(when_time)
 
-      @notes.each_index do |index|
-        when_time = schedule_note(index, when_time)
+      loop do
+        @notes.each_index do |index|
+          when_time = schedule_note(index, when_time)
+        end
+
+        break if finite
       end
 
       @oscillator.stop(when_time)
+      when_time
     end
 
     def custom_wave_type(real, imaginary = nil)

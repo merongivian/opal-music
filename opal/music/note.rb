@@ -1,6 +1,5 @@
 module Music
   class Note
-    include Native
     DURATIONS = { 'w' => 4, 'h' => 2, 'q' => 1, 'e' => 0.5, 's' => 0.25 }
     OFFSETS = {
       "B#" => 0,

@@ -1,11 +1,10 @@
 # coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'opal/music/version'
+$LOAD_PATH << File.expand_path('../opal', __FILE__)
+require 'music/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "opal-music"
-  spec.version       = Opal::Music::VERSION
+  spec.version       = Music::VERSION
   spec.authors       = ["Jose Añasco"]
   spec.email         = ["joseanasco1@gmail.com"]
 
@@ -18,11 +17,14 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  if spec.respond_to?(:metadata)
-    spec.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com' to prevent pushes to rubygems.org, or delete to allow pushes to any server."
-  end
+  spec.files         = `git ls-files`.split("\n")
+  spec.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
+  spec.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'opal', '>= 0.7.0', '< 0.9.0'
+  spec.add_runtime_dependency 'opal-browser'
+  spec.add_runtime_dependency 'opal', '0.9.0.rc1'
   spec.add_development_dependency "bundler", "~> 1.9"
   spec.add_development_dependency "rake", "~> 10.0"
+  spec.add_development_dependency "opal-rspec", "~> 0.5.0"
 end
