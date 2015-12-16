@@ -14,7 +14,8 @@ describe Music::Sequence do
       expect(sequence.play.round 1).to eq 1.4
     end
 
-    it 'plays in loop' do
+    # TODO: not using loop anymore
+    xit 'plays in loop' do
       # FIXME this monkey patches loop to run 2 times, so it returns
       # the play time * 2, we shouldn't be testing the loop
       # directly though, extract this

@@ -22,13 +22,14 @@ module Music
 
       @oscillator.start(when_time)
 
-      loop do
+      schedule = lambda do
         @notes.each_index do |index|
           when_time = schedule_note(index, when_time)
         end
-
-        break if finite
+        schedule.call
       end
+
+      schedule.call
 
       @oscillator.stop(when_time)
       when_time
