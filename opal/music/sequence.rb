@@ -1,7 +1,7 @@
 module Music
   class Sequence
 
-    attr_accessor :gain, :staccato, :smoothing, :tempo
+    attr_accessor :gain, :staccato, :smoothing, :tempo, :notes, :wave_type
 
     def initialize(audio_context, tempo, notes = [])
       @audio_context = audio_context
@@ -10,39 +10,40 @@ module Music
       @staccato      = 0
       @smoothing     = 0
       create_fx_nodes
-      create_oscillator
     end
 
     def push(*extra_notes)
       @notes.concat(extra_notes)
     end
 
-    def play(finite = true)
-      when_time ||= @audio_context.current_time
+    def play(when_time = nil)
+      previous_when_time = @audio_context.current_time.tap do |current_time|
+        # this is only used when play starts for the first
+        # time (if looped)
+        when_time ||= current_time
+      end
+
+      create_oscillator
 
       @oscillator.start(when_time)
 
-      schedule = lambda do
-        @notes.each_index do |index|
-          when_time = schedule_note(index, when_time)
-        end
-        schedule.call
+      @notes.length.times do |index|
+        when_time = schedule_note(index, when_time)
       end
 
-      schedule.call
-
       @oscillator.stop(when_time)
-      when_time
+
+      # avoid stack overflow and sinchronize
+      # play method call with actual play time
+      after(when_time - previous_when_time) do
+        @oscillator.when_finished { play(when_time) }
+      end
     end
 
     def custom_wave_type(real, imaginary = nil)
       @wave_type = :custom
       @periodic_wave = @audio_context.periodic_wave(real, imaginary || real)
       @oscillator.periodic_wave = @periodic_wave
-    end
-
-    def wave_type=(oscillator_type)
-      @wave_type = @oscillator.type = oscillator_type
     end
 
     def stop
@@ -57,7 +58,7 @@ module Music
       stop
       @oscillator = @audio_context.oscillator
       # default type
-      @oscillator.type = :square
+      @oscillator.type = @wave_type
       @oscillator.connect(@gain)
     end
 
@@ -76,7 +77,7 @@ module Music
 
     def schedule_note(index, when_time)
       current_note = get_current_note(index)
-      duration = 60 / @tempo * current_note.duration
+      duration = note_duration(index)
       cutoff = duration * ( 1 - ( @staccato || 0 ) )
       set_frequency(current_note.frequency, when_time)
 
@@ -86,6 +87,10 @@ module Music
 
       set_frequency(0, when_time + cutoff)
       when_time + duration
+    end
+
+    def note_duration(index)
+      60 / @tempo * get_current_note(index).duration
     end
 
     def slide(index, when_time, cutoff)
@@ -104,7 +109,11 @@ module Music
     end
 
     def get_current_note(index)
-      current_note = @notes[index].is_a?(Note) ? @notes[index] : Note.new(@notes[index])
+      if @notes[index].is_a?(Note)
+        @notes[index]
+      else
+        Note.new(@notes[index])
+      end
     end
 
     def get_slide_start_delay(duration)
