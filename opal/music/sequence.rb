@@ -1,7 +1,7 @@
 module Music
   class Sequence
 
-    attr_accessor :gain, :staccato, :smoothing, :tempo, :notes, :wave_type
+    attr_accessor :staccato, :smoothing, :tempo, :notes, :wave_type
 
     def initialize(audio_context, tempo, notes = [])
       @audio_context = audio_context
@@ -23,6 +23,10 @@ module Music
         when_time ||= current_time
       end
 
+      #FIXME: not stoping the previous oscillator could lead
+      #into some performing issues (if we generate a lot
+      #of oscillators), it's ok for now since we are delaying
+      #those creations with the 'after' method
       create_oscillator
 
       @oscillator.start(when_time)
@@ -30,8 +34,6 @@ module Music
       @notes.length.times do |index|
         when_time = schedule_note(index, when_time)
       end
-
-      @oscillator.stop(when_time)
 
       # avoid stack overflow and sinchronize
       # play method call with actual play time
@@ -52,10 +54,14 @@ module Music
       @oscillator = nil
     end
 
+    def volume=(value)
+      @gain.gain = value
+      @volume = value
+    end
+
     private
 
     def create_oscillator
-      stop
       @oscillator = @audio_context.oscillator
       # default type
       @oscillator.type = @wave_type
