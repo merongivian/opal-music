@@ -1,6 +1,3 @@
-require 'native'
-
-require 'browser/audio'
 require 'browser/audio/param_schedule'
 
 require 'browser/support'

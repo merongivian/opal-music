@@ -1,2 +1,1 @@
-require 'music/note'
-require 'music/sequence'
+require 'music'
