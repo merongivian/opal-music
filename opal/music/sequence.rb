@@ -8,14 +8,15 @@ require 'browser/window'
 module Music
   class Sequence
 
-    attr_accessor :staccato, :smoothing, :tempo, :notes, :wave_type
+    attr_accessor :staccato, :smoothing, :tempo, :notes, :wave_type, :loop_mode
 
-    def initialize(audio_context, tempo, notes = [])
+    def initialize(audio_context, tempo, notes = [], loop_mode = false)
       @audio_context = audio_context
       @notes         = notes
       @tempo         = tempo
       @staccato      = 0
       @smoothing     = 0
+      @loop_mode     = false
       create_fx_nodes
     end
 
@@ -23,29 +24,19 @@ module Music
       @notes.concat(extra_notes)
     end
 
-    def play(when_time = nil)
-      previous_when_time = @audio_context.current_time.tap do |current_time|
-        # this is only used when play starts for the first
-        # time (if looped)
-        when_time ||= current_time
-      end
+    def play(when_time = nil, on = true)
+      previous_when_time = @audio_context.current_time
+      when_time ||= previous_when_time
 
-      #FIXME: not stoping the previous oscillator could lead
-      #into some performing issues (if we generate a lot
-      #of oscillators), it's ok for now since we are delaying
-      #those creations with the 'after' method
-      create_oscillator
-
-      @oscillator.start(when_time)
-
-      @notes.length.times do |index|
-        when_time = schedule_note(index, when_time)
-      end
-
-      # avoid stack overflow and sinchronize
-      # play method call with actual play time
-      after(when_time - previous_when_time) do
-        @oscillator.when_finished { play(when_time) }
+      if @loop_mode
+        when_time = execute(when_time)
+        # avoid stack overflow and sinchronize
+        # play method call with actual play time
+        after(when_time - previous_when_time) do
+          @oscillator.when_finished { play(when_time) }
+        end
+      else
+        execute(when_time, on)
       end
     end
 
@@ -56,17 +47,38 @@ module Music
     end
 
     def stop
+      # FIXME: @oscillator should be destroyed on stop,
+      # same performing issues as in execute
       return unless @oscillator
       @oscillator.disconnect
-      @oscillator = nil
     end
 
     def volume=(value)
       @gain.gain = value
-      @volume = value
+    end
+
+    def volume
+      @gain.gain
     end
 
     private
+
+    def execute(when_time = nil, on = true)
+      #FIXME: not stoping the previous oscillator could lead
+      #into some performing issues (if we generate a lot
+      #of oscillators), it's ok for now since we are delaying
+      #those creations with the 'after' method
+      create_oscillator
+
+      @oscillator.start(when_time)
+      stop unless on
+
+      @notes.length.times do |index|
+        when_time = schedule_note(index, when_time)
+      end
+
+      when_time
+    end
 
     def create_oscillator
       @oscillator = @audio_context.oscillator

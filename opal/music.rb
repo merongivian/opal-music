@@ -6,6 +6,7 @@ require 'browser/audio/param_schedule'
 
 require 'music/note'
 require 'music/sequence'
+require 'music/play_schedule'
 
 module Music
   def self.audio_context
