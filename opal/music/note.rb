@@ -29,8 +29,8 @@ module Music
 
     def initialize(music_note)
       couple = music_note.split
-      @frequency = get_frequency couple.at(0)
-      @duration  = DURATIONS[couple.at(1)]
+      @frequency = get_frequency(couple.at 0)
+      @duration  = DURATIONS[couple.at 1]
     end
 
     def get_frequency(name)
@@ -39,8 +39,7 @@ module Music
       octave_offset = 4
       distance = OFFSETS[couple.at 0]
       octave_diff = (couple[1].to_i || octave_offset) - octave_offset
-
-      freq = middle_c * ((2**(1 / 12))**distance)
+      freq = distance.nil? ? 0 : middle_c * ((2**(1 / 12))**distance)
       freq * (2**octave_diff)
     end
   end

@@ -5,7 +5,7 @@ describe Music::Sequence do
     Music::Sequence.new(
       Browser::Audio::Context.new,
       170,
-      ['D3 h', 'Bb2 h']
+      ['D3 h', '- h']
     )
   end
 
