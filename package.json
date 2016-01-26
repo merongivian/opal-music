@@ -4,7 +4,7 @@
   "description": "create tunes with ruby in the browser",
   "main": "index.js",
   "scripts": {
-    "test": 'node_modules/karma/bin/karma start karma.conf.js --single-run'
+    "test": "node_modules/karma/bin/karma start karma.conf.js --browsers Chrome --single-run"
   },
   "repository": {
     "type": "git",
