@@ -1,0 +1,27 @@
+{
+  "name": "opal-music",
+  "version": "0.0.1",
+  "description": "create tunes with ruby in the browser",
+  "main": "index.js",
+  "scripts": {
+    "test": 'node_modules/karma/bin/karma start karma.conf.js --single-run'
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/merongivian/opal-music.git"
+  },
+  "keywords": [
+    "music"
+  ],
+  "author": "Jose Anasco",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/merongivian/opal-music/issues"
+  },
+  "homepage": "https://github.com/merongivian/opal-music#readme",
+  "devDependencies": {
+    "karma": "^0.13.19",
+    "karma-chrome-launcher": "^0.2.2",
+    "karma-opal-rspec": "^1.0.9"
+  }
+}
