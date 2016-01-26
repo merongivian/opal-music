@@ -34,6 +34,7 @@ module Music
     end
 
     def get_frequency(name)
+      return 0 if name =~ /-/
       couple = name.split(/(\d+)/)
       middle_c = 440 * ((2**(1 / 12))**(-9))
       octave_offset = 4
