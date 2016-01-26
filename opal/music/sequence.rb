@@ -1,4 +1,4 @@
-require 'browser/audio/param_schedule'
+require 'audio/param_schedule'
 
 require 'browser/support'
 require 'browser/event/base'
@@ -146,12 +146,12 @@ module Music
     end
 
     def set_frequency(freq, when_time)
-      scheduler = Browser::Audio::ParamSchedule.new(@oscillator.frequency false)
+      scheduler = Audio::ParamSchedule.new(@oscillator.frequency false)
       scheduler.value(freq, when_time)
     end
 
     def ramp_frequency(freq, when_time)
-      scheduler = Browser::Audio::ParamSchedule.new(@oscillator.frequency false)
+      scheduler = Audio::ParamSchedule.new(@oscillator.frequency false)
       scheduler.linear_ramp_to(freq, when_time)
     end
   end

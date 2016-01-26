@@ -4,3 +4,4 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'opal-browser', path: '../opal-browser'
+gem 'opal-audio', path: '../opal-audio'
