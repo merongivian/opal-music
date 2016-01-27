@@ -4,7 +4,7 @@ node_js:
 before_install:
   - rvm install 2.2.4
   - gem install bundler
-  - bundle exec install
+  - bundle install
 before_script:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
