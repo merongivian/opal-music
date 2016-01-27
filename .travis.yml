@@ -5,6 +5,7 @@ before_install:
   - rvm install 2.2.4
   - gem install bundler
   - ruby -e "ENV['RAILS_ENV'] = nil"
+  - ruby -e "p ENV['RAILS_ENV']"
   - bundle install
 before_script:
   - export DISPLAY=:99.0
