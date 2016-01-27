@@ -4,7 +4,7 @@ node_js:
 before_install:
   - rvm install 2.2.4
   - gem install bundler
-  - ruby -e "p ENV['RAILS_ENV']"
+  - ruby -e "ENV['RAILS_ENV'] = nil"
   - bundle install
 before_script:
   - export DISPLAY=:99.0
