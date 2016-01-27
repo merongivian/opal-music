@@ -16,6 +16,10 @@ module.exports = function (config) {
             'spec/**/*_spec.rb'
         ],
 
+        opal: {
+          loadPaths: ['opal']
+        },
+
         // list of files to exclude
         exclude: [],
 

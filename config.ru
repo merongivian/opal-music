@@ -1,7 +1,6 @@
 require 'opal/rspec'
 require 'opal-browser'
 require 'opal-audio'
-require 'opal-music'
 
 sprockets_env = Opal::RSpec::SprocketsEnvironment.new
 run Opal::Server.new(sprockets: sprockets_env) { |s|
