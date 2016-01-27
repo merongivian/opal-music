@@ -1,9 +1,9 @@
 language: node_js
 node_js:
   - 4.1
-install:
+before_install:
   - rvm install 2.2.4
-before_script:
   - gem install bundler
+before_script:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
