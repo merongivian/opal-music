@@ -4,6 +4,7 @@ node_js:
 before_install:
   - rvm install 2.2.4
   - gem install bundler
+  - gem uninstall rails
   - bundle install
 before_script:
   - export DISPLAY=:99.0
