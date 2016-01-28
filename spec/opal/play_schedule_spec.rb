@@ -3,7 +3,7 @@ require 'opal-music'
 describe Music::PlaySchedule do
   let(:sequence) do
     Music::Sequence.new(
-      Browser::Audio::Context.new,
+      Audio::Context.new,
       170,
       ['D3 h', 'Bb2 h']
     )
