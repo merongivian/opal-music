@@ -1,4 +1,5 @@
 # Opal::Music
+[![Build Status](https://travis-ci.org/merongivian/opal-music.svg)](https://travis-ci.org/merongivian/opal-music/)
 
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/opal/music`. To experiment with that code, run `bin/console` for an interactive prompt.
 
