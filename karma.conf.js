@@ -17,8 +17,7 @@ module.exports = function (config) {
         ],
 
         opal: {
-          loadPaths: ['opal'],
-          mriRequires: ['opal-browser', 'opal-audio']
+          loadPaths: ['opal']
         },
 
         // list of files to exclude

@@ -23,6 +23,6 @@
     "karma": "^0.13.19",
     "karma-firefox-launcher": "^0.1.7",
     "karma-spec-json-reporter": "0.0.8",
-    "karma-opal-rspec": "wied03/karma-opal-rspec#enhancement/16"
+    "karma-opal-rspec": "1.0.10"
   }
 }
