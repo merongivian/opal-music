@@ -146,12 +146,12 @@ module Music
     end
 
     def set_frequency(freq, when_time)
-      scheduler = Audio::ParamSchedule.new(@oscillator.frequency false)
+      scheduler = @oscillator.frequency false
       scheduler.value(freq, when_time)
     end
 
     def ramp_frequency(freq, when_time)
-      scheduler = Audio::ParamSchedule.new(@oscillator.frequency false)
+      scheduler = @oscillator.frequency false
       scheduler.linear_ramp_to(freq, when_time)
     end
   end
