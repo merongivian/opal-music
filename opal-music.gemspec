@@ -22,8 +22,6 @@ Gem::Specification.new do |spec|
   spec.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'opal-browser'
-  spec.add_dependency 'opal-audio'
   spec.add_runtime_dependency "opal", ">= 0.7.0", "<= 0.9.0"
   spec.add_development_dependency "bundler", "~> 1.9"
   spec.add_development_dependency "rake", "~> 10.0"
