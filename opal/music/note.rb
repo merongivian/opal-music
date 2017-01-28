@@ -36,11 +36,11 @@ module Music
     def self.get_frequency(name)
       return 0 if name =~ /-/
       couple = name.split(/(\d+)/)
-      middle_c = 440 * ((2**(1 / 12))**(-9))
+      middle_c = 440 * ((2**(1.0 / 12.0))**(-9))
       octave_offset = 4
       distance = OFFSETS[couple.at 0]
       octave_diff = (couple[1].to_i || octave_offset) - octave_offset
-      freq = distance.nil? ? 0 : middle_c * ((2**(1 / 12))**distance)
+      freq = distance.nil? ? 0 : middle_c * ((2**(1.0 / 12.0))**distance)
       freq * (2**octave_diff)
     end
   end
