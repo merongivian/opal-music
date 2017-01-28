@@ -1,7 +1,7 @@
-require 'browser/support'
-require 'browser/event/base'
-require 'browser/delay'
-require 'browser/window'
+#require 'browser/support'
+#require 'browser/event/base'
+#require 'browser/delay'
+#require 'browser/window'
 
 module Music
   class KeyboardSynth

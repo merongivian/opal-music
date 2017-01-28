@@ -29,11 +29,11 @@ module Music
 
     def initialize(music_note)
       couple = music_note.split
-      @frequency = get_frequency(couple.at 0)
+      @frequency = Music::Note.get_frequency(couple.at 0)
       @duration  = DURATIONS[couple.at 1]
     end
 
-    def get_frequency(name)
+    def self.get_frequency(name)
       return 0 if name =~ /-/
       couple = name.split(/(\d+)/)
       middle_c = 440 * ((2**(1 / 12))**(-9))
