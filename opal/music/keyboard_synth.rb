@@ -57,25 +57,29 @@ module Music
 
       note = Note.new("#{keyboard_note} s")
 
-      # kill previous played oscillator before playing
-      @oscillator and @oscillator.stop(@audio_context.current_time)
       # create new oscillator
-      oscillator_setup
-      @oscillator.frequency = note.frequency
-      @volume.gain = 1
-      @oscillator.start
-      @oscillator.stop(@audio_context.current_time + 1)
+      try_create_oscillator
+      @oscillator.frequency(false).linear_ramp_to(note.frequency, @audio_context.current_time)
+
+      soften_sound
+
       keyboard_note
     end
 
-    def stop
-      @volume.gain = 1
+    def soften_sound
+      return unless @audio_sequence
+      @audio_sequence.staccato  = 0.05
+      @audio_sequence.smoothing = 0.8
+      @audio_sequence.custom_wave_type([-0.8, 1, 0.8, 0.8, -0.8, -0.8, -1])
     end
 
-    def oscillator_setup
+    def try_create_oscillator
+      return if @oscillator
       @oscillator = @audio_context.oscillator
       @oscillator.type = 'sine'
       @oscillator.connect(@volume)
+      @volume.gain = 0.3
+      @oscillator.start
     end
   end
 end
