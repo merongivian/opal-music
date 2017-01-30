@@ -7,8 +7,8 @@ module Music
       @volume_array = volume_array
     end
 
-    def start
-      @volume_array.inject(nil) do |total_time, will_play|
+    def start(when_time = nil)
+      @volume_array.inject(when_time) do |total_time, will_play|
         @sequence.play(total_time, will_play)
       end
     end
